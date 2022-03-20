@@ -1,0 +1,21 @@
+.wrap {
+  background-color: rgb(46, 44, 44);
+  color: white;
+}
+.delupdate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 5vh;
+  color: rgba(250, 127, 152, 0.836);
+}
+.submit {
+  background-image: linear-gradient(
+    to left bottom,
+    #165bc4,
+    #5759d1,
+    #8652d9,
+    #b245da,
+    #dc2ad5
+  );
+}

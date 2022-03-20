@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/styled-components/6.0.0-alpha.1/styled-components.min.js"
+    integrity="sha512-8ATQoOijVLGCAE/noCcMXrwl1pAwZQ5f+ToEaf0bxNm/lanyUVCVao3766eO5erXbHIKfmx16Irb7oEzU5F7xA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="movies.css">
+  <title>Movie Reviews</title>
+</head>
+
+<body>
+  <div class="root"></div>
+
+  <script type="text/babel">
+    // import Axios from "axios";
+let useState = React.useState;
+let styled = window.styled;
+
+let Container = styled.div`
+  height: 20vh;
+  display: flex;
+  width:100vw;
+  justify-content: space-evenly;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0px 0px 5px black;
+  background-image: linear-gradient(to right top, #0d1016, #1a2a31, #264646, #436151, #707b59);
+`;
+const Input = styled.input`
+  width: 50vw;
+  height: 20px;
+`;
+const CardWrapper = styled.div`
+display:flex; border:1px solid black;flex-wrap:wrap;width:100vw;justify-content:center;background:#333333;
+`;
+const Card = styled.div`
+display:flex; justify-content:center; align-items:center;flex-direction:column;
+width:50vw;
+border:1px solid black;
+height:25vh;
+margin:5vh 10vw;
+background-image: linear-gradient(to left bottom, #165bc4, #5759d1, #8652d9, #b245da, #dc2ad5);
+padding:10px;
+`;
+
+
+
+function App() {
+    let [list,setlist]=useState([])
+    let [newReview,setnewReview]=useState()
+
+React.useEffect(()=>fetch('/getList').then(data=>data.json()).then(res=>setlist(res)),[list])
+console.log(list);
+
+function handleDel(movie){
+    fetch(`/del/${movie}`,{
+method:'DELETE',
+     } )
+     setlist(list.filter(function(value,i){ 
+        return value[i]!=movie[i];
+    }))
+}
+
+async function handleUpdate(movieName) {
+    let mdata={movieName,newReview}
+    if(newReview){
+     let req= await fetch("/updateReview", {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json",
+          },
+      body:JSON.stringify(mdata),
+    })
+}
+setnewReview("")
+}
+
+  return (
+      <div className='wrap'>
+         <Container >
+            <Inputs setlist={setlist} list={list}/>
+         </Container>
+
+         <CardWrapper>    
+        {list.map(val=>{
+            return (
+            <Card>
+              <h1>{val.movieName}</h1>
+              <h3>{val.movieReview}</h3>
+              <div className='delupdate'>
+                  
+                  <button onClick={()=>handleDel(val.movieName)}>DELETE</button>
+                  <input type="text" onChange={(e)=>setnewReview(e.target.value)}/>
+                  <button onClick={()=>{handleUpdate(val.movieName)}}>UPDATE</button>
+            </div>
+                  
+            </Card>
+                          )
+        })}
+    </CardWrapper>
+
+    </div>
+  );
+}
+
+function Inputs({setlist,list}) {
+    //here keep names totally empty otherwise empty string also fails the not null of DB
+    let [movieName,setmovieName]=useState()
+    let [movieReview,setmovieReview]=useState()
+    let input1=React.useRef(null)
+let input2=React.useRef(null)
+   async function handleSubmit() {
+    //    console.log(movieName);
+    let mdata={movieName,movieReview}
+    if(movieName && movieReview){
+     let req= await fetch("/api/add", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body:JSON.stringify(mdata),
+    })
+    setlist([...list,{movieName,movieReview}])//why not outside
+input1.current.value=''
+    input2.current.value=''
+}else{
+        alert('fill first')
+    }
+    //   console.log(data);   //unsolved error
+  }
+
+  return (
+    <>
+      <Input ref={input1} type="text" onChange={(e)=>setmovieName(e.target.value)} placeholder='movie name'/>
+      <Input ref={input2} type="text"  onChange={(e)=>setmovieReview(e.target.value)} placeholder='movie review'/>
+      <button className='submit' onClick={handleSubmit} style={{ padding: "4px 8px" }}>
+        SUBMIT
+      </button>
+    </>
+  );
+}
+ReactDOM.render(<App />, document.querySelector(".root"));
+
+    </script>
+</body>
+
+</html>
